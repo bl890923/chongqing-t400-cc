@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>400号码查询</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1f2d3d;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.app {
+    max-width: 1720px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+.header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e4663;
+}
+.header p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.main-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    padding: 0 20px 24px;
+}
+
+/* 分段输入区域 */
+.segment-area {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 20px;
+}
+.segment-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.digit-box, .digit-input {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    background: white;
+    transition: 0.2s;
+}
+.digit-box {
+    background: #f8fafc;
+    color: #1f2d3d;
+    cursor: default;
+    user-select: none;
+}
+.digit-input {
+    text-align: center;
+    padding: 0;
+    outline: none;
+}
+.digit-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+.dash {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2563eb;
+    padding: 0 2px;
+}
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+.btn {
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+.btn-secondary {
+    background: #f1f5f9;
+    color: #1f2d3d;
+    border: 1px solid #dce5ef;
+}
+.btn-secondary:hover {
+    background: #e2e8f0;
+}
+.tip-error {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #dc2626;
+    margin-top: 8px;
+    width: 100%;
+}
+
+/* 筛选栏 */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    padding: 16px 0 16px 0;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #eef2f8;
+}
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.filter-label {
+    background: #2563eb;
+    padding: 6px 16px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    user-select: none;
+}
+.tile-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.tile-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 40px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #1f2d3d;
+    white-space: nowrap;
+}
+#flTiles .tile-btn {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+}
+#flTiles .tile-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+.tile-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+.tile-btn:hover:not(.active) {
+    background: #e2e8f0;
+}
+.epstype-collapse {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.more-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 40px;
+    cursor: pointer;
+    color: #2563eb;
+    font-size: 0.78rem;
+}
+.pagesize-hidden {
+    display: none;
+}
+
+/* 卡片网格 */
+.card-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 20px 0;
+}
+.number-card {
+    background: white;
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid #eef2f8;
+    transition: all 0.2s;
+}
+.number-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    border-color: #cbd5e1;
+}
+.number {
+    font-size: 1rem;
+    font-weight: 700;
+    background: #f8fafc;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 30px;
+    margin-bottom: 10px;
+    color: #1f4662;
+}
+.meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.price {
+    background: #dbeafe;
+    padding: 2px 10px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #2563eb;
+    cursor: default;
+    transition: 0.1s;
+}
+.price-manual {
+    background: #fff2e6;
+    color: #c26b2e;
+    border-bottom: 1px dashed #c26b2e;
+    cursor: pointer;
+    position: relative;
+}
+.price-manual:hover {
+    background: #ffe6d5;
+    transform: scale(0.98);
+}
+.price-manual[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #f1f5f9;
+    font-size: 0.7rem;
+    font-weight: normal;
+    white-space: normal;
+    width: 240px;
+    max-width: 260px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    line-height: 1.4;
+}
+.price-manual[data-tooltip]:hover::after {
+    opacity: 1;
+}
+.price-manual[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1e293b transparent transparent transparent;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+    pointer-events: none;
+}
+.price-manual[data-tooltip]:hover::before {
+    opacity: 1;
+}
+
+.status {
+    padding: 2px 10px;
+    border-radius: 30px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.1s;
+}
+.status-open { background: #e0f2fe; color: #0369a1; }
+.status-occupy { background: #fff3e3; color: #b45309; cursor: default; }
+.status-option {
+    background: #2563eb;
+    color: white;
+}
+.status-option:hover {
+    background: #1e40af;
+    transform: scale(0.96);
+}
+
+/* 加载动画 */
+.loader {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+.loader span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2563eb;
+    margin: 0 3px;
+    animation: bounce 0.6s infinite alternate;
+}
+.loader span:nth-child(2) { animation-delay: 0.2s; }
+.loader span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+    to { transform: translateY(-8px); opacity: 0.4; }
+}
+
+/* 分页 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+}
+.page-info {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.page-info strong {
+    color: #2563eb;
+    font-weight: 700;
+}
+.page-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.page-btn {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 7px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #334155;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+.page-btn:hover {
+    background: #eff6ff;
+    border-color: #2563eb;
+    color: #2563eb;
+}
+.page-current {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 34px;
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 0 4px;
+}
+.page-jump {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #64748b;
+    white-space: nowrap;
+}
+.page-jump input {
+    width: 52px;
+    text-align: center;
+    padding: 6px 4px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.page-jump input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.page-go {
+    padding: 7px 14px;
+    font-weight: 600;
+}
+
+/* 弹窗 */
+.fs-modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 9999;
+}
+.fs-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
+}
+.fs-content {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 650px; max-width: 95%; height: 85%; max-height: 680px;
+    background: #fff; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+.fs-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 24px; background: #2563eb; flex-shrink: 0;
+}
+.fs-header h2 { font-size: 1.1rem; font-weight: 700; color: #fff; }
+.fs-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.2); font-size: 1.2rem; cursor: pointer;
+    color: #fff; transition: 0.15s; display: flex; align-items: center; justify-content: center;
+}
+.fs-close:hover { background: rgba(255,255,255,0.35); }
+#fsIframe { flex: 1; border: none; width: 100%; }
+
+/* 响应式 */
+@media (max-width: 600px) {
+    .pagination {
+        justify-content: center;
+        gap: 10px;
+    }
+    .page-info {
+        width: 100%;
+        text-align: center;
+    }
+    .segment-area {
+        padding: 12px 12px;
+    }
+    .digit-box, .digit-input {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+    .btn {
+        padding: 8px 18px;
+        font-size: 0.8rem;
+    }
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+    <div class="header">
+        <h1>400号码查询</h1>
+        <p>优质400号码 · 实时查询 · 自助开通</p>
+    </div>
+
+    <div class="main-card">
+        <!-- 号码输入区域 -->
+        <div id="segmentArea">
+            <div class="segment-area">
+                <div class="segment-row">
+                    <div class="digit-box">4</div>
+                    <div class="digit-box">0</div>
+                    <div class="digit-box">0</div>
+                    <span class="dash">-</span>
+                    <input id="no1" class="digit-input" type="text" maxlength="1">
+                    <input id="no2" class="digit-input" type="text" maxlength="1">
+                    <input id="no3" class="digit-input" type="text" maxlength="1">
+                    <span class="dash">-</span>
+                    <input id="no4" class="digit-input" type="text" maxlength="1">
+                    <input id="no5" class="digit-input" type="text" maxlength="1">
+                    <input id="no6" class="digit-input" type="text" maxlength="1">
+                    <input id="no7" class="digit-input" type="text" maxlength="1">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="doSearch()">查询</button>
+                    <button class="btn btn-secondary" onclick="resetAll()">重置</button>
+                </div>
+                <div id="tipFourth" class="tip-error" style="display:none;">第四位只可以是 0、1、6、7、8、9</div>
+            </div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="filters">
+            <div class="filter-group" id="epstypeGroup" style="display:none;">
+                <div class="filter-label">号码类型</div>
+                <div class="tile-buttons" id="epstypeTiles"></div>
+            </div>
+            <div class="filter-group">
+                <div class="filter-label">月消费(元)</div>
+                <div class="tile-buttons" id="flTiles"></div>
+            </div>
+            <div class="filter-group pagesize-hidden">
+                <select id="pagesize">
+                    <option value="20">20条/页</option>
+                    <option value="30">30条/页</option>
+                    <option value="50">50条/页</option>
+                    <option value="100" selected>100条/页</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 卡片容器 -->
+        <div id="cardContainer"></div>
+
+        <!-- 分页 -->
+        <div class="pagination" style="display:none;">
+            <div class="page-info" id="infoText"></div>
+            <div class="page-nav">
+                <button id="preBtn" class="page-btn">上一页</button>
+                <span class="page-current" id="pageCurrent">1</span>
+                <button id="nextBtn" class="page-btn">下一页</button>
+            </div>
+            <div class="page-jump">
+                <span>跳转</span>
+                <input id="jumpInput" type="number" min="1">
+                <button id="jumpBtn" class="page-btn page-go">GO</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全屏弹窗 -->
+<div id="fullscreenModal" class="fs-modal">
+    <div class="fs-overlay" onclick="closeModal()"></div>
+    <div class="fs-content">
+        <div class="fs-header">
+            <h2 id="fsTitle">自助开通</h2>
+            <button class="fs-close" onclick="closeModal()">&times;</button>
+        </div>
+        <iframe id="fsIframe" src="" frameborder="0"></iframe>
+    </div>
+</div>
+
+<script>
+// ===== API 配置 =====
+// 通过 URL 参数 ?api=http://xxx/ 自定义 API 地址，默认 cha.t400.com.cn
+var API_BASE = (function() {
+    var m = location.search.match(/[?&]api=([^&]+)/);
+    if (m) return decodeURIComponent(m[1]);
+    return 'http://cha.t400.com.cn/';
+})();
+// 确保末尾有 /
+if (API_BASE.charAt(API_BASE.length - 1) !== '/') API_BASE += '/';
+
+// ===== 跨域代理通信层 =====
+// 通过隐藏 iframe 加载同域 proxy.html 绕过 CORS，postMessage 双向通信
+var ProxyClient = (function() {
+    var _ready = false, _pending = {}, _reqId = 0, _iframe = null;
+
+    function init() {
+        _iframe = document.createElement('iframe');
+        _iframe.src = API_BASE + 'proxy.html';
+        _iframe.style.cssText = 'display:none;width:0;height:0;border:0;';
+        document.body.appendChild(_iframe);
+    }
+
+    window.addEventListener('message', function(event) {
+        var msg = event.data;
+        if (!msg) return;
+        if (msg.proxy === 'ready') { _ready = true; return; }
+        if (msg.id && _pending[msg.id]) {
+            var p = _pending[msg.id];
+            clearTimeout(p.timer);
+            delete _pending[msg.id];
+            if (msg.error) p.reject(new Error(msg.error));
+            else p.resolve(msg.data);
+        }
+    });
+
+    // 供外部调用的请求方法
+    function request(type, params) {
+        if (!_iframe) init();
+        return new Promise(function(resolve, reject) {
+            var id = ++_reqId;
+            var timer = setTimeout(function() {
+                delete _pending[id];
+                reject(new Error('请求超时'));
+            }, 20000);
+            _pending[id] = { resolve: resolve, reject: reject, timer: timer };
+            (function send() {
+                if (_ready && _iframe.contentWindow) {
+                    _iframe.contentWindow.postMessage({ id: id, type: type, params: params || {} }, '*');
+                } else {
+                    setTimeout(send, 50);
+                }
+            })();
+        });
+    }
+
+    return { request: request };
+})();
+
+// ===== 全局变量 =====
+var currentPage = 1, totalPages = 1, totalCount = 0;
+var currentEpstype = '';
+var currentFl = '-1';
+var cacheMode = true;
+var hiddenEpstypeNames = ['XXX*', 'XXXABC', 'FEDCBA', 'XXXCBA', 'AAAAAA', 'ABCDEF'];
+
+// ===== 首屏缓存数据（80条） =====
+var CACHED_DATA = [
+    {eps400:'4000355174',fl:50,occupytype:'可选号'},        {eps400:'4006267396',fl:80,occupytype:'可选号'},        {eps400:'4006755086',fl:80,occupytype:'可选号'},        {eps400:'4008548974',fl:50,occupytype:'可选号'},
+    {eps400:'4006904632',fl:50,occupytype:'可选号'},        {eps400:'4000368963',fl:50,occupytype:'可选号'},        {eps400:'4006229053',fl:50,occupytype:'可选号'},        {eps400:'4000779297',fl:50,occupytype:'可选号'},
+    {eps400:'4000626341',fl:50,occupytype:'可选号'},        {eps400:'4006910130',fl:50,occupytype:'可选号'},        {eps400:'4001875826',fl:80,occupytype:'可选号'},        {eps400:'4006110839',fl:80,occupytype:'可选号'},
+    {eps400:'4000812780',fl:50,occupytype:'可选号'},        {eps400:'4000753815',fl:50,occupytype:'可选号'},        {eps400:'4000792927',fl:50,occupytype:'可选号'},        {eps400:'4000229346',fl:80,occupytype:'可选号'},
+    {eps400:'4006584861',fl:50,occupytype:'可选号'},        {eps400:'4000178275',fl:50,occupytype:'可选号'},        {eps400:'4000568970',fl:50,occupytype:'可选号'},        {eps400:'4006497501',fl:50,occupytype:'可选号'},
+    {eps400:'4009954782',fl:50,occupytype:'可选号'},        {eps400:'4006087064',fl:50,occupytype:'可选号'},        {eps400:'4009924231',fl:50,occupytype:'可选号'},        {eps400:'4008453561',fl:50,occupytype:'可选号'},
+    {eps400:'4006745953',fl:50,occupytype:'可选号'},        {eps400:'4006318011',fl:100,occupytype:'可选号'},        {eps400:'4006888454',fl:1500,occupytype:'可选号'},        {eps400:'4000190965',fl:50,occupytype:'可选号'},
+    {eps400:'4001790392',fl:50,occupytype:'可选号'},        {eps400:'4000549403',fl:50,occupytype:'可选号'},        {eps400:'4000857750',fl:50,occupytype:'可选号'},        {eps400:'4008164376',fl:80,occupytype:'可选号'},
+    {eps400:'4001769344',fl:100,occupytype:'可选号'},        {eps400:'4006794097',fl:50,occupytype:'可选号'},        {eps400:'4008329569',fl:80,occupytype:'可选号'},        {eps400:'4000713472',fl:50,occupytype:'可选号'},
+    {eps400:'4006964231',fl:50,occupytype:'可选号'},        {eps400:'4006443231',fl:50,occupytype:'可选号'},        {eps400:'4008518712',fl:50,occupytype:'可选号'},        {eps400:'4008590572',fl:50,occupytype:'可选号'},
+    {eps400:'4000486308',fl:80,occupytype:'可选号'},        {eps400:'4009923452',fl:50,occupytype:'可选号'},        {eps400:'4001603731',fl:50,occupytype:'可选号'},        {eps400:'4008059965',fl:50,occupytype:'可选号'},
+    {eps400:'4008404826',fl:80,occupytype:'可选号'},        {eps400:'4006832227',fl:300,occupytype:'可选号'},        {eps400:'4000772760',fl:50,occupytype:'可选号'},        {eps400:'4008843206',fl:80,occupytype:'可选号'},
+    {eps400:'4001008145',fl:1000,occupytype:'可选号'},        {eps400:'4006924610',fl:50,occupytype:'可选号'},        {eps400:'4001188643',fl:50,occupytype:'可选号'},        {eps400:'4001018638',fl:80,occupytype:'可选号'},
+    {eps400:'4000350405',fl:50,occupytype:'可选号'},        {eps400:'4000269514',fl:50,occupytype:'可选号'},        {eps400:'4001058768',fl:80,occupytype:'可选号'},        {eps400:'4001189496',fl:80,occupytype:'可选号'},
+    {eps400:'4006230425',fl:50,occupytype:'可选号'},        {eps400:'4008591471',fl:50,occupytype:'可选号'},        {eps400:'4000511704',fl:50,occupytype:'可选号'},        {eps400:'4006117164',fl:50,occupytype:'可选号'},
+    {eps400:'4006425873',fl:50,occupytype:'可选号'},        {eps400:'4000646378',fl:80,occupytype:'可选号'},        {eps400:'4000252917',fl:50,occupytype:'可选号'},        {eps400:'4006694478',fl:80,occupytype:'可选号'},
+    {eps400:'4006519606',fl:80,occupytype:'可选号'},        {eps400:'4001635459',fl:80,occupytype:'可选号'},        {eps400:'4000736835',fl:50,occupytype:'可选号'},        {eps400:'4000974507',fl:50,occupytype:'可选号'},
+    {eps400:'4008922046',fl:80,occupytype:'可选号'},        {eps400:'4006706291',fl:50,occupytype:'可选号'},        {eps400:'4000839285',fl:50,occupytype:'可选号'},        {eps400:'4000628977',fl:100,occupytype:'可选号'},
+    {eps400:'4006581571',fl:50,occupytype:'可选号'},        {eps400:'4000925571',fl:50,occupytype:'可选号'},        {eps400:'4000484200',fl:100,occupytype:'可选号'},        {eps400:'4001189671',fl:50,occupytype:'可选号'},
+    {eps400:'4001789649',fl:80,occupytype:'可选号'},        {eps400:'4008630982',fl:50,occupytype:'可选号'},        {eps400:'4008350064',fl:50,occupytype:'可选号'},        {eps400:'4006716723',fl:50,occupytype:'可选号'},
+    {eps400:'4000657064',fl:50,occupytype:'可选号'},        {eps400:'4001125032',fl:50,occupytype:'可选号'},        {eps400:'4000321790',fl:50,occupytype:'可选号'},        {eps400:'4008632394',fl:50,occupytype:'可选号'},
+    {eps400:'4006439678',fl:500,occupytype:'可选号'},        {eps400:'4008564004',fl:100,occupytype:'可选号'},        {eps400:'4008594103',fl:50,occupytype:'可选号'},        {eps400:'4008365764',fl:50,occupytype:'可选号'},
+    {eps400:'4000744568',fl:80,occupytype:'可选号'},        {eps400:'4000375640',fl:50,occupytype:'可选号'},        {eps400:'4006949264',fl:50,occupytype:'可选号'},        {eps400:'4008692796',fl:80,occupytype:'可选号'},
+    {eps400:'4001807476',fl:80,occupytype:'可选号'},        {eps400:'4000435730',fl:50,occupytype:'可选号'},        {eps400:'4006289761',fl:50,occupytype:'可选号'},        {eps400:'4009617670',fl:50,occupytype:'可选号'},
+    {eps400:'4009947344',fl:100,occupytype:'可选号'},        {eps400:'4001803135',fl:50,occupytype:'可选号'},        {eps400:'4007631354',fl:50,occupytype:'可选号'},        {eps400:'4008458384',fl:50,occupytype:'可选号'},
+    {eps400:'4009650460',fl:50,occupytype:'可选号'},        {eps400:'4000329067',fl:50,occupytype:'可选号'},        {eps400:'4006256031',fl:50,occupytype:'可选号'},        {eps400:'4000528779',fl:80,occupytype:'可选号'},
+    {eps400:'4008646324',fl:50,occupytype:'可选号'},        {eps400:'4001654174',fl:50,occupytype:'可选号'},        {eps400:'4006770947',fl:50,occupytype:'可选号'},        {eps400:'4006893180',fl:50,occupytype:'可选号'},
+    {eps400:'4000454235',fl:50,occupytype:'可选号'},        {eps400:'4008652259',fl:80,occupytype:'可选号'},        {eps400:'4000354389',fl:80,occupytype:'可选号'},        {eps400:'4000130455',fl:100,occupytype:'可选号'},
+    {eps400:'4009674029',fl:80,occupytype:'可选号'},        {eps400:'4009603402',fl:50,occupytype:'可选号'},        {eps400:'4000980182',fl:50,occupytype:'可选号'},        {eps400:'4006853693',fl:50,occupytype:'可选号'},
+    {eps400:'4001542154',fl:50,occupytype:'可选号'},        {eps400:'4008781492',fl:50,occupytype:'可选号'},        {eps400:'4006631459',fl:80,occupytype:'可选号'},        {eps400:'4000416579',fl:80,occupytype:'可选号'},
+    {eps400:'4001653621',fl:50,occupytype:'可选号'},        {eps400:'4006369592',fl:50,occupytype:'可选号'},        {eps400:'4006751576',fl:80,occupytype:'可选号'},        {eps400:'4001277236',fl:80,occupytype:'可选号'},
+    {eps400:'4009023791',fl:50,occupytype:'可选号'},        {eps400:'4001052657',fl:50,occupytype:'可选号'},        {eps400:'4001128274',fl:50,occupytype:'可选号'},        {eps400:'4006263302',fl:50,occupytype:'可选号'},
+    {eps400:'4008110467',fl:50,occupytype:'可选号'},        {eps400:'4006805452',fl:50,occupytype:'可选号'},        {eps400:'4009925140',fl:50,occupytype:'可选号'},        {eps400:'4006655430',fl:50,occupytype:'可选号'},
+    {eps400:'4001871657',fl:50,occupytype:'可选号'},        {eps400:'4006891476',fl:80,occupytype:'可选号'},        {eps400:'4000762093',fl:50,occupytype:'可选号'},        {eps400:'4000732780',fl:50,occupytype:'可选号'},
+    {eps400:'4000183932',fl:50,occupytype:'可选号'},        {eps400:'4000678340',fl:50,occupytype:'可选号'},        {eps400:'4008043308',fl:80,occupytype:'可选号'},        {eps400:'4008947122',fl:100,occupytype:'可选号'},
+    {eps400:'4006575287',fl:50,occupytype:'可选号'},        {eps400:'4006772845',fl:50,occupytype:'可选号'},        {eps400:'4000480609',fl:80,occupytype:'可选号'},        {eps400:'4006915249',fl:80,occupytype:'可选号'},
+    {eps400:'4006873328',fl:80,occupytype:'可选号'},        {eps400:'4008393615',fl:50,occupytype:'可选号'},        {eps400:'4006672033',fl:100,occupytype:'可选号'},        {eps400:'4008523134',fl:50,occupytype:'可选号'},
+    {eps400:'4006148315',fl:50,occupytype:'可选号'},        {eps400:'4006139769',fl:80,occupytype:'可选号'},        {eps400:'4001066592',fl:50,occupytype:'可选号'},        {eps400:'4000279283',fl:50,occupytype:'可选号'},
+    {eps400:'4001671846',fl:80,occupytype:'可选号'},        {eps400:'4001780486',fl:80,occupytype:'可选号'},        {eps400:'4000942867',fl:50,occupytype:'可选号'},        {eps400:'4006486801',fl:50,occupytype:'可选号'},
+    {eps400:'4000190604',fl:50,occupytype:'可选号'},        {eps400:'4006880294',fl:50,occupytype:'可选号'},        {eps400:'4008541174',fl:50,occupytype:'可选号'},        {eps400:'4001764623',fl:50,occupytype:'可选号'},
+];
+
+// ===== 初始化数字输入 =====
+function initSegmentInputs() {
+    for (var i = 1; i <= 7; i++) {
+        (function(idx) {
+            var $input = $('#no' + idx);
+            $input.off('input keydown dblclick');
+            $input.on('input', function() {
+                var val = $(this).val();
+                var newVal = val.replace(/\D/g, '');
+                if (newVal !== val) $(this).val(newVal);
+                var current = $(this).val();
+                if (current.length > 1) {
+                    current = current.slice(-1);
+                    $(this).val(current);
+                }
+                if (current.length === 1 && idx < 7) {
+                    setTimeout(function() { $('#no' + (idx + 1)).focus(); }, 5);
+                }
+                if (idx === 4) {
+                    var fourth = $(this).val();
+                    if (fourth && !['0','1','6','7','8','9'].includes(fourth)) {
+                        $('#tipFourth').show();
+                    } else {
+                        $('#tipFourth').hide();
+                    }
+                }
+            });
+            $input.on('keydown', function(e) {
+                if (e.key === 'Backspace') {
+                    if ($(this).val() === '' && idx > 1) {
+                        $('#no' + (idx - 1)).focus();
+                    }
+                }
+            });
+            $input.on('dblclick', function() { $(this).val(''); });
+        })(i);
+    }
+}
+
+// ===== 加载号码类型筛选 =====
+function loadEpstypeTiles() {
+    ProxyClient.request('getepstype', { seg: '4' }).then(function(result) {
+        var html = result.html;
+        var $options = $(html);
+        var container = $('#epstypeTiles');
+        container.empty();
+
+        var otherBtns = [], targetAaa = null;
+        $options.each(function() {
+            var val = $(this).val(), text = $(this).text();
+            if (val === '-1') return;
+            if (hiddenEpstypeNames.includes(text)) return;
+            var btn = { val: val, text: text };
+            if (text === 'AA*A') targetAaa = btn;
+            else otherBtns.push(btn);
+        });
+        otherBtns.reverse();
+
+        var btnArray = [];
+        btnArray.push({ val: '', text: '不限' });
+        if (targetAaa) btnArray.push(targetAaa);
+        btnArray.push.apply(btnArray, otherBtns);
+
+        var $allBtns = $();
+        btnArray.forEach(function(btn) {
+            var $btn = $('<div class="tile-btn" data-epstype="' + btn.val + '">' + btn.text + '</div>');
+            $allBtns = $allBtns.add($btn);
+        });
+
+        var totalBtns = $allBtns.length, showLimit = 12;
+        if (totalBtns <= showLimit) {
+            container.append($allBtns);
+            attachEpstypeClick($allBtns);
+        } else {
+            var $visibleBtns = $allBtns.slice(0, showLimit);
+            var $hiddenBtns = $allBtns.slice(showLimit);
+            container.append($visibleBtns);
+            var $collapseDiv = $('<div class="epstype-collapse" style="display:none;"></div>').append($hiddenBtns);
+            container.append($collapseDiv);
+            var $moreBtn = $('<div class="more-btn">更多 ▼</div>');
+            container.append($moreBtn);
+            attachEpstypeClick($visibleBtns);
+            attachEpstypeClick($hiddenBtns);
+            var expanded = false;
+            $moreBtn.on('click', function() {
+                if (expanded) {
+                    $collapseDiv.slideUp(200);
+                    $moreBtn.html('更多 ▼');
+                    expanded = false;
+                } else {
+                    $collapseDiv.slideDown(200);
+                    $moreBtn.html('收起 ▲');
+                    expanded = true;
+                }
+            });
+        }
+
+        function attachEpstypeClick($btns) {
+            $btns.off('click').on('click', function() {
+                $('.tile-btn[data-epstype]').removeClass('active');
+                $(this).addClass('active');
+                currentEpstype = $(this).data('epstype') || '';
+                cacheMode = false;
+                searchNumbers(1);
+            });
+        }
+        $('.tile-btn[data-epstype=""]').addClass('active');
+        // $('#epstypeGroup').show(); // 号码类型已隐藏
+    }).catch(function(err) {
+        console.error('加载号码类型失败:', err);
+    });
+}
+
+// ===== 初始化月消费筛选 =====
+function initFlTiles() {
+    var flValues = [50, 80, 100, 300, 500, 1000, 1500, 0];
+    var container = $('#flTiles');
+    container.empty();
+    container.append('<div class="tile-btn" data-fl="-1">不限</div>');
+    for (var i = 0; i < flValues.length; i++) {
+        var val = flValues[i];
+        var label = (val === 0) ? '人工报价' : val.toString();
+        container.append('<div class="tile-btn" data-fl="' + val + '">' + label + '</div>');
+    }
+    $('.tile-btn[data-fl]').off('click').on('click', function() {
+        $('.tile-btn[data-fl]').removeClass('active');
+        $(this).addClass('active');
+        currentFl = $(this).data('fl');
+        cacheMode = false;
+        searchNumbers(1);
+    });
+    $('.tile-btn[data-fl="-1"]').addClass('active');
+}
+
+// ===== 辅助函数 =====
+function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+// ===== 渲染卡片 =====
+function renderCards(data) {
+    if (!data || data.length === 0) {
+        $('#cardContainer').html('<div style="text-align:center; padding:60px; color:#94a3b8;">暂无符合条件的号码</div>');
+        return;
+    }
+    var html = '<div class="card-list">';
+    for (var i = 0; i < data.length; i++) {
+        var item = data[i];
+        var statusClass = 'status-option';
+        var statusText = '自助开通';
+        var isManual = (item.fl == 0);
+        var priceDisplay = isManual ? '人工报价' : (item.fl + '元');
+        var priceExtraClass = isManual ? 'price-manual' : '';
+        var tooltipText = '当显示【人工报价】时，不代表号码价格高，是运营商没有录入价格，点击【人工报价】等待客服给您联系。';
+        var dataTooltipAttr = isManual ? ' data-tooltip="' + tooltipText.replace(/"/g, '&quot;') + '"' : '';
+        var priceOnclick = isManual ? ' onclick="contactManualPrice(\'' + (item.eps400 || '').replace(/'/g, "\\'") + '\')"' : '';
+        var monthlyFee = (item.fl && item.fl !== 0) ? item.fl : 0;
+        var statusOnclick = ' onclick="openSelfService(\'' + (item.eps400 || '').replace(/'/g, "\\'") + '\', ' + monthlyFee + ', ' + isManual + ')"';
+        var statusCursor = 'cursor:pointer;';
+
+        html += '<div class="number-card">' +
+            '<div class="number">' + (item.eps400 || '----') + '</div>' +
+            '<div class="meta">' +
+            '<span class="price ' + priceExtraClass + '"' + dataTooltipAttr + priceOnclick + '>' + priceDisplay + '</span>' +
+            '<span class="status ' + statusClass + '" style="' + statusCursor + '"' + statusOnclick + '>' + statusText + '</span>' +
+            '</div></div>';
+    }
+    html += '</div>';
+    $('#cardContainer').html(html);
+}
+
+// ===== 渲染分页 =====
+function renderPagination(page, total, count) {
+    totalPages = total;
+    totalCount = count;
+    currentPage = page;
+    if (!$('#preBtn').length) {
+        $('.pagination').html(
+            '<div class="page-info" id="infoText"></div>' +
+            '<div class="page-nav">' +
+            '<button id="preBtn" class="page-btn">上一页</button>' +
+            '<span class="page-current" id="pageCurrent">1</span>' +
+            '<button id="nextBtn" class="page-btn">下一页</button>' +
+            '</div>' +
+            '<div class="page-jump">' +
+            '<span>跳转</span>' +
+            '<input id="jumpInput" type="number" min="1">' +
+            '<button id="jumpBtn" class="page-btn page-go">GO</button>' +
+            '</div>'
+        );
+    }
+    $('#infoText').html('共 <strong>' + count + '</strong> 个号码 · 第 <strong>' + page + '</strong> / <strong>' + total + '</strong> 页');
+    $('#pageCurrent').text(page);
+    $('#preBtn').off('click').on('click', function() {
+        if (page > 1) searchNumbers(page - 1);
+    });
+    $('#nextBtn').off('click').on('click', function() {
+        if (page < total) searchNumbers(page + 1);
+    });
+    $('#jumpBtn').off('click').on('click', function() {
+        var target = parseInt($('#jumpInput').val());
+        if (isNaN(target)) target = 1;
+        target = Math.min(total, Math.max(1, target));
+        searchNumbers(target);
+    });
+    $('.pagination').show();
+}
+
+// ===== 搜索号码 =====
+function searchNumbers(page) {
+    if (page) currentPage = page;
+
+    if (cacheMode) {
+        var psize = parseInt($('#pagesize').val()) || 100;
+        var start = (currentPage - 1) * psize;
+        var pageData = CACHED_DATA.slice(start, start + psize);
+        if (currentFl === -1) shuffle(pageData);
+        renderCards(pageData);
+        renderPagination(currentPage, Math.ceil(CACHED_DATA.length / psize), CACHED_DATA.length);
+        $('#preBtn, #nextBtn, #jumpBtn').off('click').on('click', function() { doSearch(); });
+        return;
+    }
+
+    var occupytype = '-1';
+    var epstype = currentEpstype || '';
+    var fl = currentFl;
+    var pagesize = $('#pagesize').val();
+
+    var no1 = $('#no1').val(), no2 = $('#no2').val(), no3 = $('#no3').val(),
+        no4 = $('#no4').val(), no5 = $('#no5').val(), no6 = $('#no6').val(), no7 = $('#no7').val();
+
+    var eps400Str = '';
+    [no1, no2, no3, no4, no5, no6, no7].forEach(function(v) {
+        eps400Str += (v && v !== '') ? v : '_';
+    });
+    var eps400 = -1;
+    if (eps400Str !== '_______') eps400 = '400' + eps400Str;
+
+    $('#cardContainer').html('<div class="loader"><span></span><span></span><span></span> 查询中...</div>');
+    $('.pagination').hide();
+
+    ProxyClient.request('search', {
+        seg: '4',
+        eps400: eps400,
+        occupytype: occupytype,
+        epstype: epstype,
+        fl: fl,
+        pagesize: pagesize,
+        page: currentPage
+    }).then(function(resp) {
+        if (resp && resp.data) {
+            // 不限时随机打乱
+            if (currentFl === -1) shuffle(resp.data);
+            renderCards(resp.data);
+            var total = resp.count || 0, pages = resp.pages || 1;
+            renderPagination(currentPage, pages, total);
+        } else {
+            $('#cardContainer').html('<div style="text-align:center; padding:60px; color:#94a3b8;">查无数据</div>');
+            renderPagination(1, 1, 0);
+        }
+    }).catch(function(err) {
+        console.error('查询失败:', err);
+        $('#cardContainer').html('<div style="text-align:center; padding:60px; color:#dc2626;">请求失败，请稍后重试</div>');
+        $('.pagination').hide();
+    });
+}
+
+// ===== 全屏弹窗 =====
+function openModal(title, url) {
+    $('#fsTitle').text(title);
+    $('#fsIframe').attr('src', url);
+    var w = (title === '人工询价') ? '570px' : '650px';
+    $('.fs-content').css('width', w);
+    $('#fullscreenModal').fadeIn(200);
+}
+function closeModal() {
+    $('#fullscreenModal').fadeOut(200, function() {
+        $('#fsIframe').attr('src', '');
+    });
+}
+
+// ===== 自助开通 =====
+function openSelfService(phoneNumber, monthlyFee, isManualFlag) {
+    var p = phoneNumber || '', f = monthlyFee || 0, m = isManualFlag ? '1' : '0';
+    var url = API_BASE + 'zzkt.php?phone=' + encodeURIComponent(p) + '&fee=' + encodeURIComponent(f) + '&manual=' + m;
+    openModal('自助开通', url);
+}
+
+// ===== 人工报价 =====
+function contactManualPrice(phoneNumber) {
+    var p = phoneNumber || '';
+    var url = API_BASE + 'rgxj.php?phone=' + encodeURIComponent(p);
+    openModal('人工询价', url);
+}
+
+// ===== 查询按钮 =====
+function doSearch() {
+    cacheMode = false;
+    searchNumbers(1);
+}
+
+// ===== 重置 =====
+function resetAll() {
+    $('.tile-btn[data-epstype=""]').click();
+    $('.tile-btn[data-fl="-1"]').click();
+    for (var i = 1; i <= 7; i++) $('#no' + i).val('');
+    $('#tipFourth').hide();
+    cacheMode = true;
+    searchNumbers(1);
+}
+
+// ===== 卡片宽度自适应 =====
+function updateCardWidth() {
+    var w = window.innerWidth;
+    var n;
+    if (w >= 1720) n = 8;
+    else if (w >= 1520) n = 7;
+    else if (w >= 1300) n = 6;
+    else if (w >= 1080) n = 5;
+    else if (w >= 860) n = 4;
+    else if (w >= 650) n = 3;
+    else if (w >= 430) n = 2;
+    else n = 1;
+    var styleId = 't400-card-width';
+    var el = document.getElementById(styleId);
+    if (!el) {
+        el = document.createElement('style');
+        el.id = styleId;
+        document.head.appendChild(el);
+    }
+    el.textContent = '#cardContainer .number-card { width: calc((100% - 16px * ' + (n - 1) + ') / ' + n + ') !important; }';
+}
+
+// ===== 启动 =====
+$(document).ready(function() {
+    initSegmentInputs();
+    loadEpstypeTiles();
+    initFlTiles();
+    $('#pagesize').val('100');
+    // 首屏用缓存数据渲染（带分页）
+    searchNumbers(1);
+    updateCardWidth();
+    $(window).on('resize', updateCardWidth);
+});
+</script>
+
+</body>
+</html>
